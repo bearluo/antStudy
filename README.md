@@ -1,1 +1,289 @@
 # antStudy
+
+## 1.配置ant环境
+
+* 首先下载ant http://ant.apache.org/bindownload.cgi
+
+* 配置环境变量 ：
+
+    1. ANT_HOME :  xxx/apache-ant-1.9.4
+    2. Path     :  %ANT_HOME%\bin;%ANT_HOME%/lib
+
+* ps(检测配置成功没有 cmd ant -v)
+
+
+
+## 2.使用ant
+
+* api http://ant.apache.org/manual/index.html
+
+* 使用命令 ant 会在当前目录下查找 build.xml文件
+
+* ant [target] 执行 build.xml 下的任务 [target]
+
+## 3.源码解析
+* ### build.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MainActivity" default="help">
+
+    <!-- The local.properties file is created and updated by the 'android' tool.
+         It contains the path to the SDK. It should *NOT* be checked into
+         Version Control Systems. -->
+    <!-- 定义文件 local.properties  内的属性-->
+    <property file="local.properties" />
+
+    <!-- The ant.properties file can be created by you. It is only edited by the
+         'android' tool to add properties to it.
+         This is the place to change some Ant specific build properties.
+         Here are some properties you may want to change/update:
+
+         source.dir
+             The name of the source directory. Default is 'src'.
+         out.dir
+             The name of the output directory. Default is 'bin'.
+
+         For other overridable properties, look at the beginning of the rules
+         files in the SDK, at tools/ant/build.xml
+
+         Properties related to the SDK location or the project target should
+         be updated using the 'android' tool with the 'update' action.
+
+         This file is an integral part of the build system for your
+         application and should be checked into Version Control Systems.
+
+         -->
+         
+    <!-- 定义文件 ant.properties 内的属性 
+        ps:这个文件是用户自定义的打包属性
+        -->
+    <property file="ant.properties" />
+
+    <!-- if sdk.dir was not set from one of the property file, then
+         get it from the ANDROID_HOME env var.
+         This must be done before we load project.properties since
+         the proguard config can use sdk.dir -->
+    <!-- 定义系统环境变量内的属性 
+        -->
+    <property environment="env" />
+    <!-- 条件判断 如果存在 env.ANDROID_HOME 属性 那么就设置 sdk.dir = env.ANDROID_HOME 的值
+        ps property(属性) 设置后就不能更改了  这里sdk.dir 已经在local.properties 里面设置了
+        -->
+    <condition property="sdk.dir" value="${env.ANDROID_HOME}">
+        <isset property="env.ANDROID_HOME" />
+    </condition>
+
+    <!-- The project.properties file is created and updated by the 'android'
+         tool, as well as ADT.
+
+         This contains project specific properties such as project target, and library
+         dependencies. Lower level build properties are stored in ant.properties
+         (or in .classpath for Eclipse projects).
+
+         This file is an integral part of the build system for your
+         application and should be checked into Version Control Systems. -->
+    <!-- 定义文件 project.properties 内的属性 ps:android 打包属性
+        loadproperties 如果不存在这个文件将会报错
+        -->
+    <loadproperties srcFile="project.properties" />
+
+    <!-- quick check on sdk.dir -->
+    <fail
+            message="sdk.dir is missing. Make sure to generate local.properties using 'android update project' or to inject it through the ANDROID_HOME environment variable."
+            unless="sdk.dir"
+    />
+
+    <!--
+        Import per project custom build rules if present at the root of the project.
+        This is the place to put custom intermediary targets such as:
+            -pre-build
+            -pre-compile
+            -post-compile (This is typically used for code obfuscation.
+                           Compiled code location: ${out.classes.absolute.dir}
+                           If this is not done in place, override ${out.dex.input.absolute.dir})
+            -post-package
+            -post-build
+            -pre-clean
+    -->
+    <!-- 导入其他文件
+        optional="true" 文件不存在时也不报错 默认是false
+        -->
+    <import file="custom_rules.xml" optional="true" />
+
+    <!-- Import the actual build file.
+
+         To customize existing targets, there are two options:
+         - Customize only one target:
+             - copy/paste the target into this file, *before* the
+               <import> task.
+             - customize it to your needs.
+         - Customize the whole content of build.xml
+             - copy/paste the content of the rules files (minus the top node)
+               into this file, replacing the <import> task.
+             - customize to your needs.
+
+         ***********************
+         ****** IMPORTANT ******
+         ***********************
+         In all cases you must update the value of version-tag below to read 'custom' instead of an integer,
+         in order to avoid having your file be overridden by tools such as "android update project"
+    -->
+    <!-- version-tag: 1 -->
+    <!-- 导入sdk的打包文件
+        -->
+    <import file="${sdk.dir}/tools/ant/build.xml" />
+
+</project>
+```
+
+
+* ### local.properties
+
+```xml
+# This file is automatically generated by Android Tools.
+# Do not modify this file -- YOUR CHANGES WILL BE ERASED!
+#
+# This file must *NOT* be checked into Version Control Systems,
+# as it contains information specific to your local configuration.
+
+# location of the SDK. This is only used by Ant
+# For customization when using a Version Control System, please read the
+# header note.
+# 定义sdk路径
+sdk.dir=D:\\adt-bundle-windows-x86_64-20140702\\sdk
+```
+
+* ### ant.properties
+
+```xml
+
+```
+
+
+* ### project.properties
+
+```xml
+# This file is automatically generated by Android Tools.
+# Do not modify this file -- YOUR CHANGES WILL BE ERASED!
+#
+# This file must be checked in Version Control Systems.
+#
+# To customize properties used by the Ant build system edit
+# "ant.properties", and override values to adapt the script to your
+# project structure.
+#
+# To enable ProGuard to shrink and obfuscate your code, uncomment this (available properties: sdk.dir, user.home):
+#proguard.config=${sdk.dir}/tools/proguard/proguard-android.txt:proguard-project.txt
+
+# Project target.
+# 定义打包版本
+target=android-21
+
+```
+
+* ### custom_rules.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="custom_rules">
+    <!-- debug 模式打包 -->
+    <target name="auto-debug">
+        <property name="build.last.is.packaging.debug" value="true" />
+        <!-- 修改文件变量 -->
+        <propertyfile file="auto.prop">
+            <!--写入属性 如果存在同样key 则是修改-->
+            <entry key="build.last.is.packaging.debug" value="${build.last.is.packaging.debug}" />
+        </propertyfile>
+        <!--执行任务-->
+        <antcall target="-auto">
+        </antcall>
+    </target>
+    <!-- release 模式打包 -->
+    <target name="auto-release">
+        <property name="build.last.is.packaging.debug" value="false" />
+        <!-- 修改文件变量 -->
+        <propertyfile file="auto.prop">
+            <entry key="build.last.is.packaging.debug" value="${build.last.is.packaging.debug}" />
+        </propertyfile>
+        <antcall target="-auto">
+        </antcall>
+    </target>
+
+    <target name="-auto">
+        <!-- 复制项目到临时目录，避免替换打包影响本目录代码 -->
+        <!-- 构建文件build 所在目录 -->
+        <dirname property="auto.here.dir" file="${ant.file}" />
+        <!-- 打包路径 xxxTmp -->
+        <property name="auto.project.tmp.dir" value="${auto.here.dir}Tmp" />
+        <!-- 保证打包路径没有其他东西 -->
+        <delete dir="${auto.project.tmp.dir}" />
+        <copy todir="${auto.project.tmp.dir}" overwrite="true">
+            <fileset dir="./">
+                <!-- 忽略隐藏文件 -->
+                <exclude name=".*" />
+                <exclude name=".*/*" />
+            </fileset>
+        </copy>
+        <!-- 解析AndroidManifest.xml 获得包名 -->
+        <xmlproperty file="AndroidManifest.xml" collapseAttributes="true" />
+        <!-- 写入配置文件 -->
+        <propertyfile file="auto.prop">
+            <entry key="auto.package" value="${manifest.package}" />
+            <entry key="auto.final.versionCode" value="${manifest.android:versionCode}" />
+            <entry key="auto.final.versionName" value="${manifest.android:versionName}" />
+            <entry key="auto.project.tmp.dir" value="${auto.project.tmp.dir}" />
+        </propertyfile>
+
+        <!-- 修改友盟渠道 -->
+        <antcall target="-change-umeng-channel">
+        </antcall>
+
+        <condition property="build.last.target" value="debug" else="release">
+            <istrue value="${build.last.is.packaging.debug}" />
+        </condition>
+
+        <!-- 执行ant debug或者ant release进行打包 -->
+        <exec dir="${auto.project.tmp.dir}" executable="ant.bat">
+            <arg value="${build.last.target}" />
+        </exec>
+
+        <!-- 复制打好的包 到 本目录下 -->
+        <antcall target="-cp-out-final-file">
+        </antcall>
+
+        <property file="auto.prop" />
+        <!-- 打印 -->
+        <echo message="package: ${auto.package}" />
+        <echo message="UMENG_CHANNEL : ${auto.umeng.channel}" />
+        <echo message="versionCode: ${auto.final.versionCode}" />
+        <echo message="versionName: ${auto.final.versionName}" />
+    </target>
+    
+    <target name="-change-umeng-channel">
+        <condition property="UMENG_CHANNEL" value="debug" else="release">
+            <istrue value="${build.last.is.packaging.debug}" />
+        </condition>
+        <propertyfile file="auto.prop">
+            <entry key="auto.umeng.channel" value="${UMENG_CHANNEL}" />
+        </propertyfile>
+        <echo message="UMENG_CHANNEL : ${UMENG_CHANNEL}" />
+        <!-- 文本替换 支持正则 -->
+        <replaceregexp file="${auto.project.tmp.dir}/AndroidManifest.xml"
+           match="&lt;meta\-data(\s+)android:name=&quot;UMENG_CHANNEL&quot;(\s+)android:value=&quot;[a-zA-Z0-9]+&quot;"
+           replace="&lt;meta\-data android:name=&quot;UMENG_CHANNEL&quot; android:value=&quot;${UMENG_CHANNEL}&quot;"
+        />
+    </target>
+
+    <target name="-cp-out-final-file">
+        <property file="auto.prop" />
+        <condition property="build.last.target" value="debug" else="release">
+            <istrue value="${build.last.is.packaging.debug}" />
+        </condition>
+        
+        <copy file="${auto.project.tmp.dir}/${out.dir}/${ant.project.name}-${build.last.target}.apk" tofile="${out.absolute.dir}/${auto.package}-${auto.final.versionName}-${auto.umeng.channel}-${build.last.target}.apk" overwrite="true">
+        </copy>
+    </target>
+</project>
+
+```
