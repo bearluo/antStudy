@@ -11,7 +11,7 @@
 
 * ps(检测配置成功没有 cmd ant -v)
 
-
+![check ant](https://raw.githubusercontent.com/bearluo/antStudy/master/raw/1.png "hallo world")
 
 ## 2.使用ant
 
